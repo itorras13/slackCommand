@@ -81,14 +81,17 @@ def play_turn(channel, user, position):
 		db.session.commit()
 		done, winning_piece = is_game_done(game.id)
 		if done:
-			if winning_piece == 'X':
-				winner = game.player_x
+			if winning_piece == ' ':
+				ending_text = 'It is a draw!'
 			else:
-				winner = game.player_o
-			winner_id = get_user_id(winner)
-			winning_text = 'Congratulations to <@' + winner_id + '|' + winner + '>!\n'
-			winning_text += 'You have won!!!!'
-			board = show_board(channel, winning_text)
+				if winning_piece == 'X':
+					winner = game.player_x
+				else:
+					winner = game.player_o
+				winner_id = get_user_id(winner)
+				ending_text = 'Congratulations to <@' + winner_id + '|' + winner + '>!\n'
+				ending_text += 'You have won!!!!'
+			board = show_board(channel, ending_text)
 			game.completed = True
 			db.session.commit()
 			return board
@@ -106,33 +109,33 @@ def get_turn_dict(game_id):
 
 def is_game_done(game_id):
 	turn_dict = get_turn_dict(game_id)
-	finished = False
-	winning_piece = ' '
 	if turn_dict['tl'] == turn_dict['tc'] and turn_dict['tc'] == turn_dict['tr'] and turn_dict['tr'] != ' ':
-		finished = True
-		winning_piece = turn_dict['tl']
+		return True, turn_dict['tl']
 	elif turn_dict['ml'] == turn_dict['mc'] and turn_dict['mc'] == turn_dict['mr'] and turn_dict['mr'] != ' ':
-		finished = True
-		winning_piece = turn_dict['ml']
+		return True, turn_dict['ml']
 	elif turn_dict['bl'] == turn_dict['bc'] and turn_dict['bc'] == turn_dict['br'] and turn_dict['br'] != ' ':
-		finished = True
-		winning_piece = turn_dict['bl']
+		return True, turn_dict['bl']
 	elif turn_dict['tl'] == turn_dict['ml'] and turn_dict['ml'] == turn_dict['bl'] and turn_dict['bl'] != ' ':
-		finished = True
-		winning_piece = turn_dict['tl']
+		return True, turn_dict['tl']
 	elif turn_dict['tc'] == turn_dict['mc'] and turn_dict['mc'] == turn_dict['bc'] and turn_dict['bc'] != ' ':
-		finished = True
-		winning_piece = turn_dict['tc']
+		return True, turn_dict['tc']
 	elif turn_dict['tr'] == turn_dict['mr'] and turn_dict['mr'] == turn_dict['br'] and turn_dict['br'] != ' ':
-		finished = True
-		winning_piece = turn_dict['tr']
+		return True, turn_dict['tr']
 	elif turn_dict['tl'] == turn_dict['mc'] and turn_dict['mc'] == turn_dict['br'] and turn_dict['br'] != ' ':
-		finished = True
-		winning_piece = turn_dict['tl']
+		return True, turn_dict['tl']
 	elif turn_dict['tr'] == turn_dict['mc'] and turn_dict['mc'] == turn_dict['bl'] and turn_dict['bl'] != ' ':
-		finished = True
-		winning_piece = turn_dict['tr']
-	return finished, winning_piece
+		return True, turn_dict['tr']
+
+	all_filed = True
+	for position in positions:
+		if turn_dict[position] == ' ':
+			all_filed = False
+			break
+
+	if all_filed:
+		return True, ' '
+
+	return False, ' '
 
 def show_board(channel, text = None):
 	game = Game.query.filter(Game.channel == channel, Game.completed == False).first()
