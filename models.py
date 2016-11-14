@@ -10,12 +10,14 @@ class Game(db.Model):
 	channel = db.Column(db.String(50))
 	player_x = db.Column(db.String(50))
 	player_o = db.Column(db.String(50))
-	time_started=  db.Column(db.DateTime)
+	players_turn = db.Column(db.String(50))
+	time_started =  db.Column(db.DateTime)
 
-	def __init__(self, player_x, player_o, time_started, channel):
+	def __init__(self, player_x, player_o, channel):
 		self.completed = False
 		self.player_x = player_x
 		self.player_o = player_o
+		self.players_turn = player_x
 		self.channel = channel
 		self.time_started = datetime.utcnow()
 
@@ -23,16 +25,18 @@ class Game(db.Model):
 		return "<Game(completed='%r', player_x='%s', player_y='%s'>" % (self.completed, self.player_x, self.player_y)
 
 class Turn(db.Model):
-	__tablename__ = 'Turn'
+	__tablename__ = 'turn'
 	__table_args__ = (
         PrimaryKeyConstraint('game_id', 'position'),
     )
 	game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
-	piece = db.Column(db.String(50))
-	position = db.Column(db.Integer)
+	piece = db.Column(db.String(1))
+	position = db.Column(db.String(2))
+	empty = db.Column(db.Boolean)
 
 	def __init__(self, game_id, piece, position):
+		self.game_id = game_id
 		self.position = position
 		self.piece = piece
-		self.game_id = game_id
+		self.empty = True
 
