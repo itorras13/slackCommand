@@ -101,14 +101,16 @@ def play_turn(channel, user, position):
 				else:
 					winner = game.player_o
 				winner_id = get_user_id(winner)
-				ending_text = 'Congratulations to <@' + winner_id + '|' + winner + '>!\n'
+				ending_text = 'Congratulations to <@%s|%s>!\n' % (winner_id, winner)
 				ending_text += 'You have won!!!!'
 			board = show_board(channel, ending_text)
 			game.completed = True
 			db.session.commit()
 			return board
-		else:	
-			return show_board(channel, 'Play Made')
+		else:
+			players_turn_id = get_user_id(game.players_turn)
+			response_text = 'Play Made. <@%s|%s>, you are up!\n' % (players_turn_id, game.players_turn)
+			return show_board(channel, response_text)
 	else:
 		return response('That is not a valid move, type `/ttt help` to see the moves.', False)
 
