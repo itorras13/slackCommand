@@ -165,7 +165,8 @@ def show_board(channel, text = None):
 		board += '---+---+---\n'
 		board += ' %s | %s | %s ```' % (pos_dict['bl'], pos_dict['bc'], pos_dict['br'])
 		if text == None:
-			text = 'Here is the board'
+			players_turn_id = get_user_id(game.players_turn)
+			text = 'Here is the board. We are waiting on <@%s|%s> to choose a move.' % (players_turn_id, game.players_turn)
 		return response(text, True, {'text': board, 'mrkdwn_in': ['text', 'pretext']})
 
 #Creates a new game in channel
